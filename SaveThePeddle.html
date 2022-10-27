@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save The peddle</title>
+    <style>
+*{
+    margin: 0;
+    padding: 0;
+    font-family: cursive;
+}
+.Hide{ 
+    display: none;
+}
+body{
+    background-color:  lightgreen;
+}
+
+/* .startScreen {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    z-index: 1;
+    text-align: center;
+    cursor: pointer;
+    background-color: red;
+
+} */
+
+.peddle{
+    background-color: black;
+    height: 10px;
+    width: 32.5px;
+    margin: auto;
+border-radius: 10%;
+overflow: hidden;
+    position: absolute;
+    top: 606px;
+    left: 648px;
+    
+}
+p{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    z-index: 1;
+    text-align: center;
+    cursor: pointer;
+    background-color: rgb(300, 150, 100);
+    line-height: 25px;
+    word-spacing: 0.1px;
+    width: 360px;
+    border: black solid 2px;
+    cursor: pointer;
+}
+
+.goldCoin{
+    background-color: yellow;
+    height: 10px;
+    width: 10px;
+    background-image: url(https://png.pngtree.com/png-vector/20220612/ourmid/pngtree-golden-coin-game-ui-icon-png-image_5030176.png);
+    background-size: cover;
+   position: absolute;
+   bottom: 120px;
+ 
+    
+    border-radius: 50%;
+}
+
+.enemy{
+    background-color: red;
+    height: 10px;
+    width: 10px;
+   position: absolute;
+   bottom: 120px    ;
+    background-image: url(https://cdn.pixabay.com/photo/2013/07/13/10/51/football-157930__480.png);
+    background-size: cover;
+    border-radius: 50%;
+}
+
+.gameArea{
+    background-color: rgb(51, 137, 250);
+    border: 2px solid black;
+    width: 400px;
+    height: 621px;
+margin: auto;
+overflow: hidden;
+}
+ 
+.coinScore{
+    position: absolute;
+    top: 220px;
+    left: 50px;
+    width: 200px;
+    line-height: 80px;
+    
+    background-color: rgb(255, 123, 0);
+   font-family: fantasy;
+    text-align: center;
+    color: yellow;
+    font-size: larger;
+    
+}
+
+.score{
+    position: absolute;
+    top: 20px;
+    left: 50px;
+    width: 200px;
+    line-height: 80px;
+    
+    background-color: rgb(255, 123, 0);
+   font-family: fantasy;
+    text-align: center;
+    color: yellow;
+    font-size: larger;
+    
+}
+    </style>
+</head>
+<body>
+    <div class="game">
+        <div class="score"></div>
+        <div class="coinScore"></div>
+        <div class="startScreen"></div>
+        <p class="p">Press here to start.<br>
+        Use Arrow Keys to Move.<br>
+        Hitting a ball (<img src="https://cdn.pixabay.com/photo/2013/07/13/10/51/football-157930__480.png" width="10px" height="10px">) will end the Game.<br>
+        Collecting coins (<img src="https://png.pngtree.com/png-vector/20220612/ourmid/pngtree-golden-coin-game-ui-icon-png-image_5030176.png" width="10px" height="10px" style="border-radius: 50%;">) will increase your score by <u>100</u>.
+        
+        </p>
+        <div class="gameArea "></div>
+    </div>
+    <script>
+
+        const score = document.querySelector('.score');
+        const startScreen = document.querySelector('.startScreen');
+        const gameArea = document.querySelector('.gameArea');
+        const coinScore = document.querySelector('.coinScore');
+const p = document.querySelector('.p');
+        console.log(gameArea);
+
+
+
+
+let pr = { speed : 7,score:0,coinScore:0 };
+
+
+
+
+        let keys = {ArrowUp :false, ArrowDown :false};
+
+        document.addEventListener('keydown', keyDown);
+        document.addEventListener('keyup', keyUp);
+
+        function keyDown(e) {
+            e.preventDefault();
+            keys[e.key] = true;
+            // console.log(keys);
+        }
+
+        function keyUp(e) {
+            e.preventDefault();
+            keys[e.key] = false;
+            // console.log(keys);
+        }
+        p.addEventListener('click', start);
+        
+
+
+
+function endGame(){
+    
+    pr.start = false;
+    p.classList.remove('Hide');
+    p.innerHTML = "<b>Game Over</b> <br> Your final score is : " + pr.score + "<br><i>Press here to Restart.</i>";
+    coinScore.classList.add('Hide');
+    
+}
+
+function isCollide(a,b){
+    aRect = a.getBoundingClientRect();
+    bRect = b.getBoundingClientRect();
+    
+    return !((aRect.top>bRect.bottom) || (aRect.bottom < bRect.top) || (aRect.left > bRect.right) || (aRect.right<bRect.left))
+}
+
+function coinCollide(a,b){
+    aRect = a.getBoundingClientRect();
+    bRect = b.getBoundingClientRect();
+
+    return !((aRect.top>bRect.bottom || (aRect.bottom < bRect.top) || (aRect.left > bRect.right) || (aRect.right<bRect.left)))
+}
+
+function moveCoin(peddle){
+    let goldCoin = document.querySelectorAll('.goldCoin')
+
+    goldCoin.forEach(function(item){
+
+if (coinCollide(peddle,item)){
+    pr.score+=100;
+    coinScore.classList.remove('Hide');
+    pr.coinScore+=1;
+coinScore.innerText = "Coins Collected: " + pr.coinScore;
+    item.y-=750
+}
+
+        if(item.y >610){
+            item.y-=750
+
+            item.style.left = Math.floor(Math.random()*350+500)+"px";
+        }
+        item.y+=5;
+        item.style.top = item.y +"px";
+    })
+}
+
+function moveEnemy(peddle){
+    let enemy = document.querySelectorAll('.enemy');
+
+    enemy.forEach(function(item){
+
+if(isCollide(peddle,item)){
+    
+    // console.log("HIt HOgya");
+    endGame();
+}
+
+        if(item.y >610){
+            item.y-=750
+           
+           
+            item.style.left = Math.floor(Math.random()*350 +500) +"px";
+        }
+    
+// item.style.left = Math.floor(Math.random()*10 +510) +"px";
+item.y += 5;
+// if(item.y >= 320){item.y -=2.5}
+        item.style.top = item.y + "px";}
+)}   
+
+  
+   function won(){
+    pr.start = false;
+    p.classList.remove('Hide');
+    p.innerHTML = "Congrarulations! You won the game. Thanks for playing.👍👍👍👍👍👍";
+   } 
+
+
+function gamePlay(){
+    
+        if(pr.score>1000000000000){
+
+            won();
+
+        }
+
+let player = {};
+// let road = gameArea.getBoundingClientRect();
+// console.log(road);
+// let ball = document.querySelector('.ball');
+       let peddle = document.querySelector('.peddle');
+    //    let road = gameArea.getBoundingClientRect();
+    //    console.log(road);
+           
+
+           
+if(pr.start){
+
+// moveLines() ;
+moveEnemy(peddle);
+moveCoin(peddle);
+
+
+
+    if(keys.ArrowLeft && pr.x > 488){pr.x -=5};
+    if(keys.ArrowRight && pr.x < 844.5){pr.x +=5}; 
+    if(keys.ArrowUp && pr.y > 100){pr.y -=5};
+    if(keys.ArrowDown && pr.y < 603 ){pr.y +=5};
+    
+    
+        
+
+peddle.style.top = pr.y + "px";
+peddle.style.left = pr.x + "px";
+
+// ball.style.top = ball.y + "px";
+// ball.style.left = ball.x + "px";
+
+window.requestAnimationFrame(gamePlay);
+// console.log(pr.score++)
+
+// pr.coinScore+=1;
+
+pr.score++;
+score.innerText = "Score: " + pr.score;
+
+        }
+       
+    
+} 
+
+      
+
+       function start() {
+        // gameArea.classList.remove('Hide');
+        gameArea.innerHTML = "";
+        p.classList.add('Hide');
+
+        pr.start = true;
+        pr.score = 0;
+        pr.coinScore = 0;
+            window.requestAnimationFrame(gamePlay);
+
+    //    for(x = 0 ; x<5 ; x++){
+    //         let roadLine = document.createElement('div');
+    //         roadLine.setAttribute('class' , 'lines');
+    //         roadLine.y = (x*150);
+    //         roadLine.style.top = (roadLine.y + "px")
+    //         gameArea.appendChild(roadLine);}
+
+            let peddle = document.createElement('div');
+            peddle.setAttribute('class' , 'peddle');
+            gameArea.appendChild(peddle);
+
+            // ball.x = ball.offsetLeft;
+            // ball.y = ball.offsetTop;
+
+            // console.log("Top Position of ball :" + ball.offsetTop );
+            // console.log("Left Position of ball :" + ball.offsetLeft );
+
+            pr.x = peddle.offsetLeft;
+          pr.y = peddle.offsetTop;  
+
+            console.log("Top Position of peddle :" + peddle.offsetTop );
+            console.log("Left Position of peddle :" + peddle.offsetLeft );
+
+          for(x=0; x<8; x++){
+let enemyCar = document.createElement('div');
+enemyCar.setAttribute('class','enemy');
+enemyCar.y = ((x+1) * 250) * -1;
+// enemyCar.y = ((x*90));
+enemyCar.style.top = enemyCar.y + 'px';
+enemyCar.style.backgroundColor = 'white';
+enemyCar.style.left = Math.floor(Math.random()*350 + 500) + "px";
+gameArea.appendChild(enemyCar);
+
+          } 
+
+          for(x=0; x<5; x++){
+let goldCoin = document.createElement('div');
+goldCoin.setAttribute('class','goldCoin');
+goldCoin.y = ((x+1) * 250) * -1;
+// goldCoin.y = ((x*90));
+goldCoin.style.top = goldCoin.y + 'px';
+goldCoin.style.backgroundColor = 'yellow';
+goldCoin.style.left = Math.floor(Math.random()*350 + 500) + "px";
+gameArea.appendChild(goldCoin);
+
+          } 
+            
+
+       }
+
+
+    </script>
+</body>
+</html>
